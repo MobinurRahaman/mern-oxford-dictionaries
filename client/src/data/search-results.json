@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "limit": "5000",
+    "offset": "0",
+    "operation": "search",
+    "provider": "Oxford University Press",
+    "schema": "WordList",
+    "sourceLanguage": "en-gb",
+    "total": "8"
+  },
+  "results": [
+    {
+      "id": "power",
+      "label": "power",
+      "matchString": "power",
+      "matchType": "headword",
+      "region": "gb",
+      "score": 151.06323,
+      "word": "power"
+    },
+    {
+      "id": "staying_power",
+      "label": "staying power",
+      "matchString": "power",
+      "matchType": "headword",
+      "region": "gb",
+      "score": 44.684742,
+      "word": "staying power"
+    },
+    {
+      "id": "will_power",
+      "label": "will power",
+      "matchString": "power",
+      "matchType": "headword",
+      "region": "gb",
+      "score": 44.684742,
+      "word": "will power"
+    },
+    {
+      "id": "have_someone_in_one%27s_power",
+      "label": "have someone in one's power",
+      "matchString": "power",
+      "matchType": "headword",
+      "region": "gb",
+      "score": 29.185663,
+      "word": "have someone in one's power"
+    },
+    {
+      "id": "powerful",
+      "label": "powerful",
+      "matchString": "power",
+      "matchType": "normalised",
+      "region": "gb",
+      "score": 8.609779,
+      "word": "powerful"
+    },
+    {
+      "id": "all-powerful",
+      "label": "all-powerful",
+      "matchString": "power",
+      "matchType": "normalised",
+      "region": "gb",
+      "score": 6.425878,
+      "word": "all-powerful"
+    },
+    {
+      "id": "high-powered",
+      "label": "high-powered",
+      "matchString": "power",
+      "matchType": "normalised",
+      "region": "gb",
+      "score": 6.425878,
+      "word": "high-powered"
+    },
+    {
+      "id": "the_powers_that_be",
+      "label": "the powers that be",
+      "matchString": "power",
+      "matchType": "normalised",
+      "region": "gb",
+      "score": 4.26315,
+      "word": "the powers that be"
+    }
+  ]
+}

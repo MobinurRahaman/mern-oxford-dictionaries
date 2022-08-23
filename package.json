@@ -1,0 +1,9 @@
+{
+  "name": "mern-oxford-dictionaries",
+  "version": "1.0.0",
+  "description": "A dictionary built with MERN stack that uses Oxford Dictionaries API",
+  "main": "client/src/index.js",
+  "repository": "https://github.com/MobinurRahaman/mern-oxford-dictionaries.git",
+  "author": "MobinurRahaman <mobinurrahaman@gmail.com>",
+  "license": "MIT"
+}
