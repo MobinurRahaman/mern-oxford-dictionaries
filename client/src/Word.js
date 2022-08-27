@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ReactHowler from "react-howler";
-import {
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  Share as ShareIcon,
-  VolumeUp as VolumeUpIcon,
-} from "@material-ui/icons";
+import { VolumeUp as VolumeUpIcon } from "@material-ui/icons";
 
 import Page from "./components/Page";
 import BackdropComponent from "./components/BackdropComponent";
 
 const styles = {
+  word: {
+    fontWeight: "bold",
+    color: "#3f51b5",
+  },
   lexicalCategory: {
     fontSize: ".8rem",
     color: "#0f0",
@@ -70,7 +69,11 @@ export default function Word() {
 
   useEffect(() => {
     setState("loading");
-    fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/word/${wordId}`)
+    fetch(
+      `${process.env.REACT_APP_SERVER_BASE_URL}/word/${encodeURIComponent(
+        wordId
+      )}`
+    )
       .then((res) => res.json())
       .then((jsonData) => {
         setData(jsonData);
@@ -114,7 +117,11 @@ export default function Word() {
         return (
           <>
             <div style={styles.word}>{data.word}</div>
-            {data?.limit_error && <p>Usage limit exceeded</p>}
+            {data?.limit_error && (
+              <p>
+                Usage limit exceeded. Contact the admin to get further access.
+              </p>
+            )}
             {data?.error ? (
               <p>Word not found. Please check the spelling.</p>
             ) : (
@@ -123,7 +130,7 @@ export default function Word() {
                   {a.lexicalEntries?.map((x, xi) => (
                     <>
                       <span style={styles.lexicalCategory}>
-                        {x.lexicalCategory.text}
+                        {x.lexicalCategory?.text}
                       </span>
 
                       {x.entries?.map((y, yi) => (
@@ -131,7 +138,7 @@ export default function Word() {
                           {y.etymologies && (
                             <>
                               <h4 style={styles.sectionTitle}>Etymology</h4>
-                              {y.etymologies.map((b, bi) => (
+                              {y.etymologies?.map((b, bi) => (
                                 <div key={bi}>
                                   <p style={styles.etymology}>{b}</p>
                                 </div>
@@ -142,7 +149,7 @@ export default function Word() {
                           {y.pronunciations && (
                             <>
                               <h4 style={styles.sectionTitle}>Pronunciation</h4>
-                              {y.pronunciations.map((c, ci) => (
+                              {y.pronunciations?.map((c, ci) => (
                                 <div key={ci}>
                                   <div style={styles.pronunciationWrapper}>
                                     <div
@@ -183,7 +190,7 @@ export default function Word() {
                           {y.senses && (
                             <>
                               <ol>
-                                {y.senses.map((d, di) => (
+                                {y.senses?.map((d, di) => (
                                   <div key={di}>
                                     <div>
                                       <li style={styles.definition}>
@@ -191,7 +198,7 @@ export default function Word() {
                                           <>
                                             (
                                             <span style={styles.domainClasses}>
-                                              {d.domainClasses[0].text}
+                                              {d.domainClasses[0]?.text}
                                             </span>
                                             ){" "}
                                           </>
@@ -202,7 +209,7 @@ export default function Word() {
                                             <span
                                               style={styles.definitionRegister}
                                             >
-                                              {d.registers[0].text}
+                                              {d.registers[0]?.text}
                                             </span>
                                             ){" "}
                                           </>
@@ -211,26 +218,24 @@ export default function Word() {
                                       </li>
                                     </div>
 
-                                    {d.examples && <ul className={styles.examplesWrapper}>
-                                      {d.examples.map((e, ei) => (
-                                        <li
-                                          style={styles.example}
-                                          key={ei}
-                                        >
-                                          <p>
-                                            {e.registers && (
-                                              <span
-                                                style={styles.exampleRegister}
-                                              >
-                                                ({e.registers[0].text}){" "}
-                                              </span>
-                                            )}
-                                            {e.text}
-                                          </p>
-                                        </li>
-                                      ))}
+                                    {d.examples && (
+                                      <ul className={styles.examplesWrapper}>
+                                        {d.examples?.map((e, ei) => (
+                                          <li style={styles.example} key={ei}>
+                                            <p>
+                                              {e.registers && (
+                                                <span
+                                                  style={styles.exampleRegister}
+                                                >
+                                                  ({e.registers[0]?.text}){" "}
+                                                </span>
+                                              )}
+                                              {e.text}
+                                            </p>
+                                          </li>
+                                        ))}
                                       </ul>
-                                    }
+                                    )}
 
                                     {d.shortDefinitions && (
                                       <p style={styles.shortDefinition}>
@@ -244,7 +249,7 @@ export default function Word() {
                                           Synonyms
                                         </h4>
                                         <div style={styles.synonyms}>
-                                          {d.synonyms.map((z, zi) => (
+                                          {d.synonyms?.map((z, zi) => (
                                             <>
                                               {z.language === "en" && (
                                                 <span

@@ -4,7 +4,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
   ListItemSecondaryAction,
   ButtonBase,
   IconButton,
@@ -37,20 +36,17 @@ export default function History() {
         >
           {history.map((item, index) => (
             <>
+              <Divider />
               <ListItem
                 key={index}
-                style={{
-                  /*backgroundColor: "#f00",*/ margin: "2px 0",
-                  padding: 0,
-                  alignItems: "stretch",
-                }}
+                style={{ margin: 0, padding: 0, alignItems: "stretch" }}
               >
                 <ButtonBase
                   style={{
                     display: "flex",
                     flex: 1,
                     justifyContent: "flex-start",
-                    alignItems: "center" /*backgroundColor: "#f0f"*/,
+                    alignItems: "center",
                   }}
                   onClick={() => navigate(`/word/${item.wordId}`)}
                 >
@@ -62,7 +58,7 @@ export default function History() {
                       flexDirection: "column",
                       flex: 1,
                       justifyContent: "center",
-                      alignItems: "flex-start" /*backgroundColor: "#0ff"*/,
+                      alignItems: "flex-start",
                     }}
                   />
                 </ButtonBase>
@@ -70,7 +66,7 @@ export default function History() {
                   style={{
                     display: "flex",
                     justifyContent: "center",
-                    alignItems: "center" /*backgroundColor: "#daf"*/,
+                    alignItems: "center",
                   }}
                 >
                   <IconButton
@@ -80,7 +76,6 @@ export default function History() {
                   </IconButton>
                 </div>
               </ListItem>
-              <Divider />
             </>
           ))}
         </List>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
@@ -28,6 +28,7 @@ import {
   History as HistoryIcon,
   Star as StarIcon,
   Receipt as ReceiptIcon,
+  Clear as ClearIcon,
   ErrorOutline as ErrorOutlineIcon,
 } from "@material-ui/icons";
 import Autocomplete, {
@@ -45,6 +46,9 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    "& .MuiAutocomplete-clearIndicator": {
+      color: "#fff",
+    },
   },
   drawer: {
     [theme.breakpoints.up("md")]: {
@@ -94,7 +98,10 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
   input: {
-    color: "white",
+    color: "#fff",
+  },
+  endAdornment: {
+    marginRight: 35,
   },
   content: {
     position: "relative",
@@ -103,65 +110,81 @@ const useStyles = makeStyles((theme) => ({
     //overflow: "auto",
     boxSizing: "border-box",
   },
-  input: {
-    color: "#fff",
-  },
 }));
 
-const filter = createFilterOptions();
+const SearchTermContext = createContext();
 
-function FreeSoloCreateOption() {
+function AsyncSearchSuggestions() {
   const classes = useStyles();
   const navigate = useNavigate();
 
-  const [state, setState] = useState("idle");
-  const [value, setValue] = useState(null);
-  const [searchResults, setSearchResults] = useState({});
-  const [open, setOpen] = useState(false);
+  const { searchTerm } = useContext(SearchTermContext);
 
-  const handleSearch = (event) => {
-    if (event.keyCode === 13) {
-      navigate(`/word/${encodeURIComponent(event.target.value)}`);
+  const [open, setOpen] = useState(false);
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [options, setOptions] = useState([]);
+  const loading = open && searchInputValue.length > 0 && options;
+
+  const handleChange = (event) => {
+    setSearchInputValue(event.target.value);
+
+    if (event.target.value) {
+      if (event.keyCode === 13) {
+        navigate(`/word/${encodeURIComponent(event.target.value)}`);
+      } else {
+        setStatus("loading");
+        fetch(
+          `${process.env.REACT_APP_SERVER_BASE_URL}/search/${encodeURIComponent(event.target.value)}`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.results) {
+              setOptions(data.results);
+              setStatus("idle");
+            } else if (data.limit_error) {
+              setStatus("error");
+              setTimeout(() => setStatus("idle"), 1000);
+              setOpen(false);
+              alert(
+                "Usage limit exceeded. Contact the admin to get further access."
+              );
+            } else {
+              setStatus("error");
+              setTimeout(() => setStatus("idle"), 1000);
+            }
+          })
+          .catch((err) => {
+            setStatus("error");
+            setTimeout(() => setStatus("idle"), 1000);
+          });
+      }
+    } else {
+      setOptions([]);
     }
   };
 
   const EndAdornment = () => {
-    switch (state) {
+    switch (status) {
       case "loading":
-        return <CircularProgress color="inherit" size={20} />;
+        return (
+          <CircularProgress
+            className={classes.endAdornment}
+            color="inherit"
+            size={20}
+          />
+        );
       case "error":
-        return <ErrorOutlineIcon />;
+        return <ErrorOutlineIcon className={classes.endAdornment} />;
       case "default":
-        return <></>;
+        return null;
     }
   };
 
-  const searchTerm = "aqu";
-  useEffect(() => {
-    setState("loading");
-    fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/search/${searchTerm}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setSearchResults(json);
-        setState("loaded");
-      })
-      .catch(() => {
-        setState("error");
-        setTimeout(() => {
-          setState("idle");
-        }, 1000);
-      });
-  }, [value]);
-
-  useEffect(() => {
-    if (!open) {
-      setSearchResults({});
-    }
-  }, [open]);
-
   return (
     <Autocomplete
-      value={value}
+      id="search-field"
+      fullWidth
       open={open}
       onOpen={() => {
         setOpen(true);
@@ -169,63 +192,37 @@ function FreeSoloCreateOption() {
       onClose={() => {
         setOpen(false);
       }}
+      closeIcon={
+        searchInputValue ? (
+          <ClearIcon
+            onClick={() => {
+              setSearchInputValue("");
+              setOpen(false);
+              setOptions([]);
+            }}
+          />
+        ) : null
+      }
+      isOptionEqualToValue={(option, value) => option.word === value.word}
+      getOptionLabel={(option) => option.word}
       onChange={(event, newValue) => {
-        if (typeof newValue === "string") {
-          setValue({
-            title: newValue,
-          });
-        } else if (newValue && newValue.inputValue) {
-          // Create a new value from the user input
-          setValue({
-            title: newValue.inputValue,
-          });
-        } else {
-          setValue(newValue);
+        if (newValue) {
+          navigate(`/word/${newValue.word ? newValue.word : newValue}`);
         }
-        if (newValue) navigate(`/word/${newValue.word}`);
       }}
-      filterOptions={(options, params) => {
-        const filtered = filter(options, params);
-
-        // Suggest the creation of a new value
-        /*if (params.inputValue !== '') {
-          filtered.push({
-            inputValue: params.inputValue,
-            title: "No results found",
-          });
-        }*/
-
-        return filtered;
-      }}
-      //selectOnFocus
-      handleHomeEndKeys
-      id="free-solo-with-text-demo"
-      options={searchResults2.results}
-      loading={state === "loaded" ? false : true}
-      getOptionLabel={(option) => {
-        // Value selected with enter, right from the input
-        if (typeof option === "string") {
-          return option;
-        }
-        // Add "xxx" option created dynamically
-        if (option.inputValue) {
-          return option.inputValue;
-        }
-        // Regular option
-        return option.word;
-      }}
-      renderOption={(option) => option.word}
-      style={{ width: 300 }}
+      onBlur={() => setStatus("idle")}
+      noOptionsText={searchInputValue ? "No results found" : ""}
+      options={options}
+      loading={status !== "idle" ? true : false}
       freeSolo
       renderInput={(params) => (
         <TextField
           {...params}
           type="search"
-          color="primary"
           autoFocus
           placeholder="Enter search term here"
           variant="standard"
-          onKeyUp={handleSearch}
+          onKeyUp={handleChange}
           InputProps={{
             ...params.InputProps,
             className: classes.input,
@@ -242,15 +239,6 @@ function FreeSoloCreateOption() {
     />
   );
 }
-
-const defaultOptions = {
-  loop: true,
-  autoplay: true,
-  animationData: animationData,
-  rendererSettings: {
-    preserveAspectRatio: "xMidYMid slice",
-  },
-};
 
 function Page(props) {
   const classes = useStyles();
@@ -361,7 +349,9 @@ function Page(props) {
           </Typography>
           {props.searchField && (
             <>
-              <FreeSoloCreateOption />
+              <SearchTermContext.Provider value={{ searchTerm: "reed" }}>
+                <AsyncSearchSuggestions />
+              </SearchTermContext.Provider>
               <div className={classes.rightBtns}>
                 {!props.noRightBtns && (
                   <>

@@ -18,7 +18,7 @@ app.get("/search/:searchTerm", (req, res) => {
   const options = {
     host: 'od-api.oxforddictionaries.com',
     port: '443',
-    path: '/api/v2/search/thesaurus/en?q=' + req.params.searchTerm,
+    path: '/api/v2/search/thesaurus/en?q=' + req.params.searchTerm + '&limit=20',
     method: "GET",
     headers: {
       'app_id': process.env.APP_ID,
@@ -38,7 +38,7 @@ app.get("/search/:searchTerm", (req, res) => {
         res.json(parsed);
       }
       catch(e) {
-        res.status(500).json({"limit_error": "Use limit exceeded"});
+        res.status(500).json({"limit_error": "Usage limit exceeded"});
       }
     });
   });
