@@ -18,6 +18,7 @@ import {
   TextField,
   Box,
   CircularProgress,
+  Modal,
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
@@ -38,8 +39,8 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 
-import searchResults2 from "../data/search-results.json";
-import animationData from "../lotties/14634-voicemate.json";
+import Lottie from "react-lottie";
+import animationData from "../lotties/19246-voice.json";
 
 const drawerWidth = 240;
 
@@ -103,6 +104,21 @@ const useStyles = makeStyles((theme) => ({
   endAdornment: {
     marginRight: 35,
   },
+  speechRecognitionModal: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  speechRecognitionModalBody: {
+    width: "90%",
+    maxWidth: 500,
+    padding: theme.spacing(4),
+    backgroundColor: theme.palette.background.paper,
+  },
+  transcript: {
+    textAlign: "center",
+  },
   content: {
     position: "relative",
     width: "100%",
@@ -135,7 +151,9 @@ function AsyncSearchSuggestions() {
       } else {
         setStatus("loading");
         fetch(
-          `${process.env.REACT_APP_SERVER_BASE_URL}/search/${encodeURIComponent(event.target.value)}`
+          `${process.env.REACT_APP_SERVER_BASE_URL}/search/${encodeURIComponent(
+            event.target.value
+          )}`
         )
           .then((res) => res.json())
           .then((data) => {
@@ -246,7 +264,15 @@ function Page(props) {
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState(false);
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
 
   const {
     transcript,
@@ -258,14 +284,23 @@ function Page(props) {
     isMicrophoneAvailable,
   } = useSpeechRecognition();
 
+  const startListening = () => {
+    if (isMicrophoneAvailable) {
+      SpeechRecognition.startListening();
+    } else {
+      alert(
+        "Microphone permission is not available\nGo to Settings -> Site settings -> Microphone and allow microphone access for this site"
+      );
+    }
+  };
+
   useEffect(() => {
     listening ? setModalOpen(true) : setModalOpen(false);
   }, [listening]);
 
   useEffect(() => {
     if (finalTranscript.trim()) {
-      setSearchValue(finalTranscript);
-      navigate(`/word/${encodeURI(finalTranscript)}`);
+      navigate(`/word/${encodeURIComponent(finalTranscript)}`);
     }
   }, [finalTranscript]);
 
@@ -349,7 +384,9 @@ function Page(props) {
           </Typography>
           {props.searchField && (
             <>
-              <SearchTermContext.Provider value={{ searchTerm: "reed" }}>
+              <SearchTermContext.Provider
+                value={{ searchTerm: "" }}
+              >
                 <AsyncSearchSuggestions />
               </SearchTermContext.Provider>
               <div className={classes.rightBtns}>
@@ -359,13 +396,28 @@ function Page(props) {
                       edge="end"
                       color="inherit"
                       aria-label="voice search"
-                      onClick={SpeechRecognition.startListening}
+                      onClick={startListening}
                     >
                       <MicIcon />
                     </IconButton>
                   </>
                 )}
               </div>
+              <Modal
+                className={classes.speechRecognitionModal}
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onBackdropClick={() => SpeechRecognition.abortListening()}
+                aria-labelledby="speech-recognition-modal"
+                aria-describedby="speech-recognition-modal"
+              >
+                <div className={classes.speechRecognitionModalBody}>
+                  <Lottie options={defaultOptions} height={120} width={200} />
+                  <Typography variant="body1" className={classes.transcript}>
+                    {transcript}
+                  </Typography>
+                </div>
+              </Modal>
             </>
           )}
         </Toolbar>
