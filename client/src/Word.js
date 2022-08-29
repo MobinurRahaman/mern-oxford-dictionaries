@@ -13,7 +13,7 @@ const styles = {
   },
   lexicalCategory: {
     fontSize: ".8rem",
-    color: "#0f0",
+    color: "#080",
   },
   sectionTitle: {
     marginBottom: -5,

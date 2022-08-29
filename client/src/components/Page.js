@@ -412,6 +412,9 @@ function Page(props) {
                 aria-describedby="speech-recognition-modal"
               >
                 <div className={classes.speechRecognitionModalBody}>
+                  <Typography variant="h6">
+                    Listening...
+                  </Typography>
                   <Lottie options={defaultOptions} height={120} width={200} />
                   <Typography variant="body1" className={classes.transcript}>
                     {transcript}
