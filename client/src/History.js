@@ -4,7 +4,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   ButtonBase,
   IconButton,
   Divider,
@@ -27,7 +26,7 @@ export default function History() {
 
   return (
     <Page title="History">
-      {history === null ? (
+      {history === null || history?.length === 0 ? (
         <p>Your history is empty</p>
       ) : (
         <List

@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { IconButton } from "@material-ui/core";
+import {
+  VolumeUp as VolumeUpIcon,
+  StarOutline as StarOutlineIcon,
+  Star as StarIcon,
+  Share as ShareIcon,
+} from "@material-ui/icons";
 import ReactHowler from "react-howler";
-import { VolumeUp as VolumeUpIcon } from "@material-ui/icons";
 
 import Page from "./components/Page";
 import BackdropComponent from "./components/BackdropComponent";
@@ -65,27 +71,25 @@ export default function Word() {
   const [state, setState] = useState("loading");
   const [data, setData] = useState({});
   const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
+  const [isBookmarked, setBookmarked] = useState(false);
   const { wordId } = useParams();
 
   useEffect(() => {
     setState("loading");
-    fetch(
-      `${process.env.REACT_APP_SERVER_BASE_URL}/word/${encodeURIComponent(
-        wordId
-      )}`
-    )
+    fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/word/${wordId}`)
       .then((res) => res.json())
       .then((jsonData) => {
         setData(jsonData);
-        addToWordHistory({ wordId: jsonData.id, word: jsonData.word });
         setState("loaded");
+        addWordToHistory({ wordId: jsonData.id, word: jsonData.word });
+        checkIfBookmarked(wordId);
       })
       .catch(() => {
         setState("error");
       });
   }, [wordId]);
 
-  const addToWordHistory = (wordObj) => {
+  const addWordToHistory = (wordObj) => {
     if (localStorage) {
       let history = JSON.parse(localStorage.getItem("history"));
       if (history === null) {
@@ -96,8 +100,59 @@ export default function Word() {
         history.push(wordObj);
       }
       localStorage.setItem("history", JSON.stringify(history));
+      console.log(`${wordObj.word} added to history`);
     } else {
       console.log("localStorage is not supported on your browser");
+    }
+  };
+
+  const checkIfBookmarked = (wordId) => {
+    if (localStorage) {
+      let bookmarks = JSON.parse(localStorage.getItem("bookmarks"));
+      if (bookmarks !== null) {
+        const bookmarked = bookmarks.some((item) => item.wordId === wordId);
+        setBookmarked(bookmarked);
+      }
+    }
+  };
+
+  const toggleAddWordToBookmarks = (wordObj) => {
+    if (localStorage) {
+      let bookmarks = JSON.parse(localStorage.getItem("bookmarks"));
+      if (bookmarks === null) {
+        bookmarks = [];
+        bookmarks.push(wordObj);
+      } else {
+        bookmarks = bookmarks.filter((item) => item.wordId !== wordObj.wordId);
+        !isBookmarked && bookmarks.push(wordObj);
+      }
+      localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+      setBookmarked(!isBookmarked);
+      console.log(
+        `${wordObj.word} ${
+          isBookmarked ? "removed from" : "added to"
+        } bookmarks`
+      );
+      console.log(JSON.parse(localStorage.getItem("bookmarks")));
+    } else {
+      console.log("localStorage is not supported on your browser");
+    }
+  };
+
+  const shareWord = (word) => {
+    if (navigator.share) {
+      navigator
+        .share({
+          text: word,
+        })
+        .then(() => {
+          console.log(`word ${word} shared`);
+        })
+        .catch((err) => {
+          console.log(`Couldn't share because of`, err.message);
+        });
+    } else {
+      console.log("web share not supported on your device");
     }
   };
 
@@ -116,7 +171,26 @@ export default function Word() {
       case "loaded":
         return (
           <>
-            <div style={styles.word}>{data.word}</div>
+            <div style={{ display: "flex", gap: 5 }}>
+              <span style={styles.word}>{data.word}</span>
+              <div style={{ flexGrow: 1 }}></div>
+              <IconButton
+                size="small"
+                aria-label="toggle bookmark"
+                onClick={() =>
+                  toggleAddWordToBookmarks({ wordId: data.id, word: data.word })
+                }
+              >
+                {isBookmarked ? <StarIcon /> : <StarOutlineIcon />}
+              </IconButton>
+              <IconButton
+                size="small"
+                aria-label="share word"
+                onClick={() => shareWord(data.word)}
+              >
+                <ShareIcon />
+              </IconButton>
+            </div>
             {data?.limit_error && (
               <p>
                 Usage limit exceeded. Contact the admin to get further access.

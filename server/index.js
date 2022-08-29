@@ -26,7 +26,9 @@ app.get("/search/:searchTerm", cacheSearchSuggestions, (req, res) => {
     host: "od-api.oxforddictionaries.com",
     port: "443",
     path:
-      "/api/v2/search/thesaurus/en?q=" + req.params.searchTerm + "&limit=20",
+      "/api/v2/search/thesaurus/en?q=" +
+      encodeURIComponent(req.params.searchTerm) +
+      "&limit=20",
     method: "GET",
     headers: {
       app_id: process.env.APP_ID,
@@ -54,7 +56,7 @@ app.get("/word/:wordId", cacheWords, (req, res) => {
   const options = {
     host: "od-api.oxforddictionaries.com",
     port: "443",
-    path: "/api/v2/entries/en-gb/" + req.params.wordId,
+    path: "/api/v2/entries/en-gb/" + encodeURIComponent(req.params.wordId),
     method: "GET",
     headers: {
       app_id: process.env.APP_ID,

@@ -16,7 +16,6 @@ import {
   IconButton,
   Typography,
   TextField,
-  Box,
   CircularProgress,
   Modal,
 } from "@material-ui/core";
@@ -32,9 +31,7 @@ import {
   Clear as ClearIcon,
   ErrorOutline as ErrorOutlineIcon,
 } from "@material-ui/icons";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -140,7 +137,6 @@ function AsyncSearchSuggestions() {
   const [searchInputValue, setSearchInputValue] = useState("");
   const [status, setStatus] = useState("idle");
   const [options, setOptions] = useState([]);
-  const loading = open && searchInputValue.length > 0 && options;
 
   const handleChange = (event) => {
     setSearchInputValue(event.target.value);
@@ -274,15 +270,8 @@ function Page(props) {
     },
   };
 
-  const {
-    transcript,
-    interimTranscript,
-    finalTranscript,
-    resetTranscript,
-    listening,
-    browserSupportsSpeechRecognition,
-    isMicrophoneAvailable,
-  } = useSpeechRecognition();
+  const { transcript, finalTranscript, listening, isMicrophoneAvailable } =
+    useSpeechRecognition();
 
   const startListening = () => {
     if (isMicrophoneAvailable) {
@@ -384,9 +373,7 @@ function Page(props) {
           </Typography>
           {props.searchField && (
             <>
-              <SearchTermContext.Provider
-                value={{ searchTerm: "" }}
-              >
+              <SearchTermContext.Provider value={{ searchTerm: "" }}>
                 <AsyncSearchSuggestions />
               </SearchTermContext.Provider>
               <div className={classes.rightBtns}>
@@ -412,9 +399,7 @@ function Page(props) {
                 aria-describedby="speech-recognition-modal"
               >
                 <div className={classes.speechRecognitionModalBody}>
-                  <Typography variant="h6">
-                    Listening...
-                  </Typography>
+                  <Typography variant="h6">Listening...</Typography>
                   <Lottie options={defaultOptions} height={120} width={200} />
                   <Typography variant="body1" className={classes.transcript}>
                     {transcript}
