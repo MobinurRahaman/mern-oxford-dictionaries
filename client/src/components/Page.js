@@ -12,7 +12,9 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemSecondaryAction,
   Divider,
+  Switch,
   IconButton,
   Typography,
   TextField,
@@ -28,6 +30,7 @@ import {
   History as HistoryIcon,
   Star as StarIcon,
   Receipt as ReceiptIcon,
+  Brightness3 as Brightness3Icon,
   Clear as ClearIcon,
   ErrorOutline as ErrorOutlineIcon,
 } from "@material-ui/icons";
@@ -35,6 +38,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { DarkModeContext } from "../App";
 
 import Lottie from "react-lottie";
 import animationData from "../lotties/19246-voice.json";
@@ -261,6 +265,8 @@ function Page(props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const { darkMode, setDarkMode } = useContext(DarkModeContext);
+
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -300,8 +306,7 @@ function Page(props) {
 
   const drawer = (
     <div>
-      <div className={classes.toolbar} />
-      <List>
+      <List aria-label="menu">
         <ListItem button onClick={() => navigate("/")}>
           <ListItemIcon>
             <HomeIcon />
@@ -320,12 +325,34 @@ function Page(props) {
           </ListItemIcon>
           <ListItemText primary="Bookmarks" />
         </ListItem>
-        <Divider />
+      </List>
+      <Divider />
+      <List aria-label="misc">
         <ListItem button onClick={() => navigate("/privacy-policy")}>
           <ListItemIcon>
             <ReceiptIcon />
           </ListItemIcon>
           <ListItemText primary="Privacy policy" />
+        </ListItem>
+      </List>
+      <Divider />
+      <List aria-label="settings">
+        <ListItem>
+          <ListItemIcon>
+            <Brightness3Icon />
+          </ListItemIcon>
+          <ListItemText primary="Dark mode" />
+          <ListItemSecondaryAction>
+            <Switch
+              color="primary"
+              checked={darkMode}
+              onChange={() => {
+                setDarkMode(!darkMode);
+              }}
+              name="darkMode"
+              inputProps={{ "aria-label": "toggle dark mode" }}
+            />
+          </ListItemSecondaryAction>
         </ListItem>
       </List>
     </div>

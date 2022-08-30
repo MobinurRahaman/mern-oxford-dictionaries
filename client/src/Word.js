@@ -53,7 +53,7 @@ const styles = {
   exampleRegister: {},
   shortDefinition: {
     fontSize: ".8rem",
-    color: "#555",
+    color: "#888",
   },
   synonyms: {
     margin: "10px 0",
@@ -152,7 +152,7 @@ export default function Word() {
           console.log(`Couldn't share because of`, err.message);
         });
     } else {
-      console.log("web share not supported on your device");
+      console.log("web share is not supported on your browser");
     }
   };
 
