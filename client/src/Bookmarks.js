@@ -27,7 +27,7 @@ export default function Bookmarks() {
   return (
     <Page title="Bookmarks">
       {bookmarks === null || bookmarks?.length === 0 ? (
-        <p>Your bookmarks is empty</p>
+        <p>Bookmarks empty</p>
       ) : (
         <List
           aria-label="bookmarks"

@@ -14,27 +14,22 @@ import BackdropComponent from "./components/BackdropComponent";
 
 const styles = {
   word: {
+    fontSize: "1.5em",
     fontWeight: "bold",
     color: "#6e7ccd",
   },
   lexicalCategory: {
-    fontSize: ".8em",
+    fontSize: ".9em",
+    fontWeight: "bold",
     color: "#080",
   },
   sectionTitle: {
     marginBottom: -5,
   },
-  etymology: {
-    fontSize: ".9em",
-  },
   pronunciationWrapper: {
     display: "flex",
     alignItems: "center",
     gap: 5,
-    //fontSize: ".9em",
-  },
-  definition: {
-    fontSize: ".9em",
   },
   domainClasses: {
     fontStyle: "italic",
@@ -42,28 +37,41 @@ const styles = {
   definitionRegister: {
     fontStyle: "italic",
   },
+  variantFormRegion: {
+    fontStyle: "italic",
+  },
   examplesWrapper: {
-    listStyleType: "square",
+    listStyleType: "disc",
   },
   example: {
     marginTop: "-1em",
     fontStyle: "italic",
-    fontSize: ".8em",
+    fontSize: ".9em",
   },
-  exampleRegister: {},
   shortDefinition: {
-    fontSize: ".8em",
+    fontSize: ".9em",
+    color: "#666",
+  },
+  variantForm: {
+    fontSize: ".9em",
     color: "#888",
   },
   synonyms: {
     margin: "10px 0",
   },
   synonym: {
-    fontSize: ".75em",
+    fontSize: ".8em",
+  },
+  derivative: {
+    fontSize: ".9em",
+    margin: "2px 0",
   },
   phrase: {
-    fontSize: ".8em",
-    lineSpacing: 0.1,
+    fontSize: ".9em",
+    margin: "2px 0",
+  },
+  note: {
+    fontSize: ".9em",
   },
 };
 
@@ -73,7 +81,7 @@ export default function Word() {
   const [dictionaryFontSize, setDictionaryFontSize] = useState(
     localStorage.getItem("dictionaryFontSize") !== null
       ? parseInt(localStorage.getItem("dictionaryFontSize"))
-      : 16
+      : 14
   );
   const [isBookmarked, setBookmarked] = useState(false);
   const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
@@ -231,168 +239,435 @@ export default function Word() {
             {data?.error ? (
               <p>Word not found. Please check the spelling.</p>
             ) : (
-              data?.results?.map((a, ai) => (
-                <>
-                  {a.lexicalEntries?.map((x, xi) => (
-                    <>
-                      <span style={styles.lexicalCategory}>
-                        {x.lexicalCategory?.text}
-                      </span>
+              <>
+                {data?.results?.map((a, ai) => (
+                  <>
+                    {a.lexicalEntries?.map((x, xi) => (
+                      <>
+                        <span style={styles.lexicalCategory}>
+                          {x.lexicalCategory?.text}
+                        </span>
 
-                      {x.entries?.map((y, yi) => (
-                        <>
-                          {y.etymologies && (
-                            <>
-                              <h4 style={styles.sectionTitle}>Etymology</h4>
-                              {y.etymologies?.map((b, bi) => (
-                                <div key={bi}>
-                                  <p style={styles.etymology}>{b}</p>
-                                </div>
-                              ))}
-                            </>
-                          )}
-
-                          {y.pronunciations && (
-                            <>
-                              <h4 style={styles.sectionTitle}>Pronunciation</h4>
-                              {y.pronunciations?.map((c, ci) => (
-                                <div key={ci}>
-                                  <div style={styles.pronunciationWrapper}>
-                                    <div
-                                      aria-label="play pronunciation"
-                                      onClick={() =>
-                                        setPronunciationPlaying(true)
-                                      }
-                                    >
-                                      <VolumeUpIcon />
-                                    </div>
-
-                                    <ReactHowler
-                                      src={c.audioFile}
-                                      playing={isPronunciationPlaying}
-                                      onStop={() =>
-                                        setPronunciationPlaying(false)
-                                      }
-                                      onEnd={() =>
-                                        setPronunciationPlaying(false)
-                                      }
-                                    />
-
-                                    <p style={styles.dialect}>
-                                      ({c.dialects[0]})
-                                    </p>
-                                    <p style={styles.phoneticNotation}>
-                                      {c.phoneticNotation}:
-                                    </p>
-                                    <p style={styles.phoneticSpelling}>
-                                      /{c.phoneticSpelling}/
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </>
-                          )}
-
-                          {y.senses && (
-                            <>
-                              <ol>
-                                {y.senses?.map((d, di) => (
-                                  <div key={di}>
-                                    <div>
-                                      <li style={styles.definition}>
-                                        {d.domainClasses && (
-                                          <>
-                                            (
-                                            <span style={styles.domainClasses}>
-                                              {d.domainClasses[0]?.text}
-                                            </span>
-                                            ){" "}
-                                          </>
-                                        )}
-                                        {d.registers && (
-                                          <>
-                                            (
-                                            <span
-                                              style={styles.definitionRegister}
-                                            >
-                                              {d.registers[0]?.text}
-                                            </span>
-                                            ){" "}
-                                          </>
-                                        )}
-                                        {d.definitions[0]}
-                                      </li>
-                                    </div>
-
-                                    {d.examples && (
-                                      <ul className={styles.examplesWrapper}>
-                                        {d.examples?.map((e, ei) => (
-                                          <li style={styles.example} key={ei}>
-                                            <p>
-                                              {e.registers && (
-                                                <span
-                                                  style={styles.exampleRegister}
-                                                >
-                                                  ({e.registers[0]?.text}){" "}
-                                                </span>
-                                              )}
-                                              {e.text}
-                                            </p>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-
-                                    {d.shortDefinitions && (
-                                      <p style={styles.shortDefinition}>
-                                        {d.shortDefinitions}
-                                      </p>
-                                    )}
-
-                                    {d.synonyms && (
-                                      <div style={styles.synonymsWrapper}>
-                                        <h4 style={styles.sectionTitle}>
-                                          Synonyms
-                                        </h4>
-                                        <div style={styles.synonyms}>
-                                          {d.synonyms?.map((z, zi) => (
-                                            <>
-                                              {z.language === "en" && (
-                                                <span
-                                                  style={styles.synonym}
-                                                  key={zi}
-                                                >
-                                                  {(zi ? ", " : "") + z.text}
-                                                </span>
-                                              )}
-                                            </>
-                                          ))}
-                                        </div>
+                        {x.entries?.map((y, yi) => (
+                          <>
+                            {ai === 0 && xi === 0 && y.pronunciations && (
+                              <>
+                                <h4 style={styles.sectionTitle}>
+                                  Pronunciation
+                                </h4>
+                                {y.pronunciations?.map((c, ci) => (
+                                  <div key={ci}>
+                                    <div style={styles.pronunciationWrapper}>
+                                      <div
+                                        aria-label="play pronunciation"
+                                        onClick={() =>
+                                          setPronunciationPlaying(true)
+                                        }
+                                      >
+                                        <VolumeUpIcon />
                                       </div>
-                                    )}
+
+                                      <ReactHowler
+                                        src={c.audioFile}
+                                        playing={isPronunciationPlaying}
+                                        onStop={() =>
+                                          setPronunciationPlaying(false)
+                                        }
+                                        onEnd={() =>
+                                          setPronunciationPlaying(false)
+                                        }
+                                      />
+
+                                      <p style={styles.dialect}>
+                                        ({c.dialects[0]})
+                                      </p>
+                                      <p style={styles.phoneticNotation}>
+                                        {c.phoneticNotation}:
+                                      </p>
+                                      <p style={styles.phoneticSpelling}>
+                                        /{c.phoneticSpelling}/
+                                      </p>
+                                    </div>
                                   </div>
                                 ))}
-                              </ol>
-                            </>
-                          )}
-                        </>
-                      ))}
+                              </>
+                            )}
 
-                      {x.phrases && (
-                        <>
-                          <h4 style={styles.sectionTitle}>Phrases</h4>
-                          {x.phrases?.map((f, fi) => (
-                            <p style={styles.phrase} key={fi}>
-                              {f.text}
-                            </p>
-                          ))}
-                        </>
+                            {y.etymologies && (
+                              <>
+                                <h4 style={styles.sectionTitle}>Etymology</h4>
+                                {y.etymologies?.map((b, bi) => (
+                                  <div key={bi}>
+                                    <p style={styles.etymology}>{b}</p>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+
+                            {y.senses && (
+                              <>
+                                <ol>
+                                  {y.senses?.map((d, di) => (
+                                    <div key={di}>
+                                      {d.definitions && (
+                                        <div>
+                                          <li style={styles.sense}>
+                                            {d.domainClasses && (
+                                              <>
+                                                (
+                                                <span
+                                                  style={styles.domainClasses}
+                                                >
+                                                  {d.domainClasses[0]?.text}
+                                                </span>
+                                                ){" "}
+                                              </>
+                                            )}
+                                            {d.registers && (
+                                              <>
+                                                (
+                                                <span
+                                                  style={
+                                                    styles.definitionRegister
+                                                  }
+                                                >
+                                                  {d.registers[0]?.text}
+                                                </span>
+                                                ){" "}
+                                              </>
+                                            )}
+                                            {d.definitions && (
+                                              <span style={styles.definition}>
+                                                {d.definitions[0]}
+                                              </span>
+                                            )}
+                                          </li>
+                                        </div>
+                                      )}
+
+                                      {d.examples && (
+                                        <ul style={styles.examplesWrapper}>
+                                          {d.examples?.map((e, ei) => (
+                                            <li style={styles.example} key={ei}>
+                                              <p>
+                                                {e.registers && (
+                                                  <span
+                                                    style={
+                                                      styles.exampleRegister
+                                                    }
+                                                  >
+                                                    ({e.registers[0]?.text}){" "}
+                                                  </span>
+                                                )}
+                                                {e.text}
+                                              </p>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      )}
+
+                                      {d.shortDefinitions && (
+                                        <p style={styles.shortDefinition}>
+                                          {d.shortDefinitions}
+                                        </p>
+                                      )}
+
+                                      {d.variantForms?.map((s, si) => (
+                                        <div
+                                          style={styles.variantForm}
+                                          key={si}
+                                        >
+                                          {s.regions && (
+                                            <span
+                                              style={styles.variantFormRegion}
+                                            >
+                                              ({s.regions[0].text})
+                                            </span>
+                                          )}{" "}
+                                          <span style={styles.variantForm}>
+                                            {s.text}
+                                          </span>
+                                        </div>
+                                      ))}
+
+                                      {d.synonyms && (
+                                        <div style={styles.synonymsWrapper}>
+                                          <h4 style={styles.sectionTitle}>
+                                            Synonyms
+                                          </h4>
+                                          <div style={styles.synonyms}>
+                                            {d.synonyms?.map((z, zi) => (
+                                              <>
+                                                {z.language === "en" && (
+                                                  <span
+                                                    style={styles.synonym}
+                                                    key={zi}
+                                                  >
+                                                    {(zi ? ", " : "") + z.text}
+                                                  </span>
+                                                )}
+                                              </>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {d.subsenses && (
+                                        <>
+                                          <h4>Subsenses</h4>
+                                          <>
+                                            <ol>
+                                              {d.subsenses?.map((n, ni) => (
+                                                <div key={ni}>
+                                                  <div>
+                                                    <li style={styles.subsense}>
+                                                      {n.domainClasses && (
+                                                        <>
+                                                          (
+                                                          <span
+                                                            style={
+                                                              styles.domainClasses
+                                                            }
+                                                          >
+                                                            {
+                                                              n.domainClasses[0]
+                                                                ?.text
+                                                            }
+                                                          </span>
+                                                          ){" "}
+                                                        </>
+                                                      )}
+                                                      {n.registers && (
+                                                        <>
+                                                          (
+                                                          <span
+                                                            style={
+                                                              styles.definitionRegister
+                                                            }
+                                                          >
+                                                            {
+                                                              n.registers[0]
+                                                                ?.text
+                                                            }
+                                                          </span>
+                                                          ){" "}
+                                                        </>
+                                                      )}
+                                                      {n.definitions && (
+                                                        <span
+                                                          style={
+                                                            styles.definition
+                                                          }
+                                                        >
+                                                          {n.definitions[0]}
+                                                        </span>
+                                                      )}
+                                                    </li>
+                                                  </div>
+
+                                                  {n.examples && (
+                                                    <ul
+                                                      style={
+                                                        styles.examplesWrapper
+                                                      }
+                                                    >
+                                                      {n.examples?.map(
+                                                        (o, oi) => (
+                                                          <li
+                                                            style={
+                                                              styles.example
+                                                            }
+                                                            key={oi}
+                                                          >
+                                                            <p>
+                                                              {o.registers && (
+                                                                <span
+                                                                  style={
+                                                                    styles.exampleRegister
+                                                                  }
+                                                                >
+                                                                  (
+                                                                  {
+                                                                    o
+                                                                      .registers[0]
+                                                                      ?.text
+                                                                  }
+                                                                  ){" "}
+                                                                </span>
+                                                              )}
+                                                              {o.text}
+                                                            </p>
+                                                          </li>
+                                                        )
+                                                      )}
+                                                    </ul>
+                                                  )}
+
+                                                  {n.shortDefinitions && (
+                                                    <p
+                                                      style={
+                                                        styles.shortDefinition
+                                                      }
+                                                    >
+                                                      {n.shortDefinitions}
+                                                    </p>
+                                                  )}
+
+                                                  {n.variantForms?.map(
+                                                    (s, si) => (
+                                                      <div
+                                                        style={
+                                                          styles.variantForm
+                                                        }
+                                                        key={si}
+                                                      >
+                                                        {s.regions && (
+                                                          <span
+                                                            style={
+                                                              styles.variantFormRegion
+                                                            }
+                                                          >
+                                                            ({s.regions[0].text}
+                                                            )
+                                                          </span>
+                                                        )}{" "}
+                                                        <span
+                                                          style={
+                                                            styles.variantForm
+                                                          }
+                                                        >
+                                                          {s.text}
+                                                        </span>
+                                                      </div>
+                                                    )
+                                                  )}
+
+                                                  {n.synonyms && (
+                                                    <div
+                                                      style={
+                                                        styles.synonymsWrapper
+                                                      }
+                                                    >
+                                                      <h4
+                                                        style={
+                                                          styles.sectionTitle
+                                                        }
+                                                      >
+                                                        Synonyms
+                                                      </h4>
+                                                      <div
+                                                        style={styles.synonyms}
+                                                      >
+                                                        {n.synonyms?.map(
+                                                          (p, pi) => (
+                                                            <>
+                                                              {p.language ===
+                                                                "en" && (
+                                                                <span
+                                                                  style={
+                                                                    styles.synonym
+                                                                  }
+                                                                  key={pi}
+                                                                >
+                                                                  {(pi
+                                                                    ? ", "
+                                                                    : "") +
+                                                                    p.text}
+                                                                </span>
+                                                              )}
+                                                            </>
+                                                          )
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </ol>
+                                          </>
+                                        </>
+                                      )}
+
+                                      {d.crossReferences && (
+                                        <>
+                                          <h4 style={styles.sectionTitle}>
+                                            See also
+                                          </h4>
+                                          {d.crossReferences?.map((q, qi) => (
+                                            <p
+                                              style={styles.crossReference}
+                                              key={qi}
+                                            >
+                                              {q.text}
+                                              {d.crossReferenceMarkers[0] && (
+                                                <span
+                                                  style={
+                                                    styles.crossReferenceMarker
+                                                  }
+                                                >
+                                                  {" "}
+                                                  ({d.crossReferenceMarkers[0]})
+                                                </span>
+                                              )}
+                                            </p>
+                                          ))}
+                                        </>
+                                      )}
+                                    </div>
+                                  ))}
+                                </ol>
+                              </>
+                            )}
+                          </>
+                        ))}
+
+                        {ai < data.results.length && <Divider />}
+                      </>
+                    ))}
+                  </>
+                ))}
+
+                {data?.results[0]?.lexicalEntries[0].derivatives && (
+                  <>
+                    <h4 style={styles.sectionTitle}>Derivatives</h4>
+                    <ul>
+                      {data?.results[0]?.lexicalEntries[0].derivatives?.map(
+                        (m, mi) => (
+                          <li style={styles.derivative} key={mi}>
+                            {m.text}
+                          </li>
+                        )
                       )}
-                      {ai < data.results.length - 1 && <Divider />}
-                    </>
-                  ))}
-                </>
-              ))
+                    </ul>
+                  </>
+                )}
+
+                {data?.results[0]?.lexicalEntries[0].phrases && (
+                  <>
+                    <h4 style={styles.sectionTitle}>Phrases</h4>
+                    <ul>
+                      {data?.results[0]?.lexicalEntries[0].phrases?.map(
+                        (f, fi) => (
+                          <li style={styles.phrase} key={fi}>
+                            {f.text}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </>
+                )}
+                {data?.results[0]?.lexicalEntries[0]?.entries[0]?.notes && (
+                  <>
+                    <h4 style={styles.sectionTitle}>Note</h4>
+                    <p style={styles.note}>
+                      {
+                        data?.results[0]?.lexicalEntries[0]?.entries[0]
+                          ?.notes[0].text
+                      }
+                    </p>
+                  </>
+                )}
+              </>
             )}
           </>
         );
@@ -402,7 +677,7 @@ export default function Word() {
   };
 
   return (
-    <Page searchField>
+    <Page title="MERN Oxford Dictionaries" searchField>
       <div className="content" style={{ fontSize: `${dictionaryFontSize}px` }}>
         <DictionaryContent />
       </div>

@@ -99,6 +99,11 @@ const useStyles = makeStyles((theme) => ({
   centeredTitle: {
     textAlign: "center",
   },
+  autocomplete: {
+    [theme.breakpoints.up("md")]: {
+      maxWidth: 300,
+    },
+  },
   input: {
     color: "#fff",
   },
@@ -202,6 +207,7 @@ function AsyncSearchSuggestions() {
   return (
     <Autocomplete
       id="search-field"
+      className={classes.autocomplete}
       fullWidth
       open={open}
       onOpen={() => {
