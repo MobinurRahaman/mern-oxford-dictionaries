@@ -70,11 +70,11 @@ const styles = {
 export default function Word() {
   const [state, setState] = useState("loading");
   const [data, setData] = useState({});
-  
-  
-  const [dictionaryFontSize, setDictionaryFontSize] = useState(localStorage.getItem("dictionaryFontSize") !== null
+  const [dictionaryFontSize, setDictionaryFontSize] = useState(
+    localStorage.getItem("dictionaryFontSize") !== null
       ? parseInt(localStorage.getItem("dictionaryFontSize"))
-      : 16);
+      : 16
+  );
   const [isBookmarked, setBookmarked] = useState(false);
   const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
   const { wordId } = useParams();
@@ -112,13 +112,15 @@ export default function Word() {
   };
 
   const decreaseFontSize = () => {
-    const newFontSize = dictionaryFontSize > 8 ? dictionaryFontSize - 1 : dictionaryFontSize;
+    const newFontSize =
+      dictionaryFontSize > 8 ? dictionaryFontSize - 1 : dictionaryFontSize;
     setDictionaryFontSize(newFontSize);
     localStorage.setItem("dictionaryFontSize", newFontSize);
   };
 
   const increaseFontSize = () => {
-    const newFontSize = dictionaryFontSize < 30 ? dictionaryFontSize + 1 : dictionaryFontSize;
+    const newFontSize =
+      dictionaryFontSize < 30 ? dictionaryFontSize + 1 : dictionaryFontSize;
     setDictionaryFontSize(newFontSize);
     localStorage.setItem("dictionaryFontSize", newFontSize);
   };

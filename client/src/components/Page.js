@@ -265,7 +265,7 @@ function Page(props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { darkMode, setDarkMode } = useContext(DarkModeContext);
+  const { darkMode, setDarkModePersistantly } = useContext(DarkModeContext);
 
   const defaultOptions = {
     loop: true,
@@ -347,7 +347,7 @@ function Page(props) {
               color="primary"
               checked={darkMode}
               onChange={() => {
-                setDarkMode(!darkMode);
+                setDarkModePersistantly(!darkMode);
               }}
               name="darkMode"
               inputProps={{ "aria-label": "toggle dark mode" }}

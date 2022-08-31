@@ -12,7 +12,22 @@ import PageNotFound from "./PageNotFound";
 export const DarkModeContext = createContext();
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("darkMode") !== null
+      ? true
+      : window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? true
+      : false
+  );
+
+  const setDarkModePersistantly = (bool = false) => {
+    setDarkMode(bool);
+    bool
+      ? localStorage.setItem("darkMode", true)
+      : localStorage.removeItem("darkMode");
+  };
+
   const theme = createMuiTheme({
     palette: {
       type: darkMode ? "dark" : "light",
@@ -20,7 +35,7 @@ export default function App() {
   });
 
   return (
-    <DarkModeContext.Provider value={{ darkMode, setDarkMode }}>
+    <DarkModeContext.Provider value={{ darkMode, setDarkModePersistantly }}>
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
