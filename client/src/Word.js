@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { IconButton } from "@material-ui/core";
+import { IconButton, Divider } from "@material-ui/core";
 import {
   VolumeUp as VolumeUpIcon,
   StarOutline as StarOutlineIcon,
@@ -15,26 +15,26 @@ import BackdropComponent from "./components/BackdropComponent";
 const styles = {
   word: {
     fontWeight: "bold",
-    color: "#3f51b5",
+    color: "#6e7ccd",
   },
   lexicalCategory: {
-    fontSize: ".8rem",
+    fontSize: ".8em",
     color: "#080",
   },
   sectionTitle: {
     marginBottom: -5,
   },
   etymology: {
-    fontSize: ".9rem",
+    fontSize: ".9em",
   },
   pronunciationWrapper: {
     display: "flex",
     alignItems: "center",
     gap: 5,
-    //fontSize: ".9rem",
+    //fontSize: ".9em",
   },
   definition: {
-    fontSize: ".9rem",
+    fontSize: ".9em",
   },
   domainClasses: {
     fontStyle: "italic",
@@ -46,23 +46,23 @@ const styles = {
     listStyleType: "square",
   },
   example: {
-    marginTop: -15,
+    marginTop: "-1em",
     fontStyle: "italic",
-    fontSize: ".8rem",
+    fontSize: ".8em",
   },
   exampleRegister: {},
   shortDefinition: {
-    fontSize: ".8rem",
+    fontSize: ".8em",
     color: "#888",
   },
   synonyms: {
     margin: "10px 0",
   },
   synonym: {
-    fontSize: ".75rem",
+    fontSize: ".75em",
   },
   phrase: {
-    fontSize: ".8rem",
+    fontSize: ".8em",
     lineSpacing: 0.1,
   },
 };
@@ -70,8 +70,13 @@ const styles = {
 export default function Word() {
   const [state, setState] = useState("loading");
   const [data, setData] = useState({});
-  const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
+  
+  
+  const [dictionaryFontSize, setDictionaryFontSize] = useState(localStorage.getItem("dictionaryFontSize") !== null
+      ? parseInt(localStorage.getItem("dictionaryFontSize"))
+      : 16);
   const [isBookmarked, setBookmarked] = useState(false);
+  const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
   const { wordId } = useParams();
 
   useEffect(() => {
@@ -106,6 +111,18 @@ export default function Word() {
     }
   };
 
+  const decreaseFontSize = () => {
+    const newFontSize = dictionaryFontSize > 8 ? dictionaryFontSize - 1 : dictionaryFontSize;
+    setDictionaryFontSize(newFontSize);
+    localStorage.setItem("dictionaryFontSize", newFontSize);
+  };
+
+  const increaseFontSize = () => {
+    const newFontSize = dictionaryFontSize < 30 ? dictionaryFontSize + 1 : dictionaryFontSize;
+    setDictionaryFontSize(newFontSize);
+    localStorage.setItem("dictionaryFontSize", newFontSize);
+  };
+
   const checkIfBookmarked = (wordId) => {
     if (localStorage) {
       let bookmarks = JSON.parse(localStorage.getItem("bookmarks"));
@@ -133,7 +150,6 @@ export default function Word() {
           isBookmarked ? "removed from" : "added to"
         } bookmarks`
       );
-      console.log(JSON.parse(localStorage.getItem("bookmarks")));
     } else {
       console.log("localStorage is not supported on your browser");
     }
@@ -174,6 +190,20 @@ export default function Word() {
             <div style={{ display: "flex", gap: 5 }}>
               <span style={styles.word}>{data.word}</span>
               <div style={{ flexGrow: 1 }}></div>
+              <IconButton
+                size="small"
+                aria-label="decrease font size"
+                onClick={decreaseFontSize}
+              >
+                A-
+              </IconButton>
+              <IconButton
+                size="small"
+                aria-label="increase font size"
+                onClick={increaseFontSize}
+              >
+                A+
+              </IconButton>
               <IconButton
                 size="small"
                 aria-label="toggle bookmark"
@@ -356,7 +386,7 @@ export default function Word() {
                           ))}
                         </>
                       )}
-                      {ai < data.results.length - 1 && <hr style={styles.hr} />}
+                      {ai < data.results.length - 1 && <Divider />}
                     </>
                   ))}
                 </>
@@ -371,7 +401,7 @@ export default function Word() {
 
   return (
     <Page searchField>
-      <div className="App">
+      <div className="content" style={{ fontSize: `${dictionaryFontSize}px` }}>
         <DictionaryContent />
       </div>
     </Page>
