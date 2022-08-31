@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { IconButton, Divider } from "@material-ui/core";
 import {
   VolumeUp as VolumeUpIcon,
@@ -75,7 +75,7 @@ const styles = {
   },
 };
 
-export default function Word() {
+export default function Definition() {
   const [state, setState] = useState("loading");
   const [data, setData] = useState({});
   const [dictionaryFontSize, setDictionaryFontSize] = useState(
@@ -85,7 +85,8 @@ export default function Word() {
   );
   const [isBookmarked, setBookmarked] = useState(false);
   const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
-  const { wordId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const wordId = searchParams.get("q");
 
   useEffect(() => {
     setState("loading");

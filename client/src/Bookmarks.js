@@ -47,7 +47,7 @@ export default function Bookmarks() {
                     justifyContent: "flex-start",
                     alignItems: "center",
                   }}
-                  onClick={() => navigate(`/word/${item.wordId}`)}
+                  onClick={() => navigate(`/definition/?q=${item.wordId}`)}
                 >
                   <ListItemText
                     primary={item.word}

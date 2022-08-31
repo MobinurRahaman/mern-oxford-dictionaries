@@ -152,7 +152,7 @@ function AsyncSearchSuggestions() {
 
     if (event.target.value) {
       if (event.keyCode === 13) {
-        navigate(`/word/${encodeURIComponent(event.target.value)}`);
+        navigate(`/definition/?q=${encodeURIComponent(event.target.value)}`);
       } else {
         setStatus("loading");
         fetch(
@@ -231,7 +231,7 @@ function AsyncSearchSuggestions() {
       getOptionLabel={(option) => option.word}
       onChange={(event, newValue) => {
         if (newValue) {
-          navigate(`/word/${newValue.word ? newValue.word : newValue}`);
+          navigate(`/definition/?q=${newValue.word ? newValue.word : newValue}`);
         }
       }}
       onBlur={() => setStatus("idle")}
@@ -301,7 +301,7 @@ function Page(props) {
 
   useEffect(() => {
     if (finalTranscript.trim()) {
-      navigate(`/word/${encodeURIComponent(finalTranscript)}`);
+      navigate(`/definition/?q=${encodeURIComponent(finalTranscript)}`);
     }
   }, [finalTranscript]);
 
