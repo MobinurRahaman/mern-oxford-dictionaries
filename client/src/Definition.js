@@ -562,7 +562,7 @@ export default function Definition() {
                                                       >
                                                         {n.synonyms?.map(
                                                           (p, pi) => (
-                                                            <div key={pi}>
+                                                            <span key={pi}>
                                                               {p.language ===
                                                                 "en" && (
                                                                 <span
@@ -577,7 +577,7 @@ export default function Definition() {
                                                                     p.text}
                                                                 </span>
                                                               )}
-                                                            </div>
+                                                            </span>
                                                           )
                                                         )}
                                                       </div>

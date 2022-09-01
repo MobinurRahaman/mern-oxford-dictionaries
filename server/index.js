@@ -1,10 +1,11 @@
 const express = require("express");
 const apicache = require("apicache");
 const bodyParser = require("body-parser");
-
 const http = require("https");
 const cors = require("cors");
 require("dotenv").config();
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const DeviceDetector = require("device-detector-js");
 
 const app = express();
 app.use(cors());
@@ -53,6 +54,35 @@ app.get("/search/:searchTerm", cacheSearchSuggestions, (req, res) => {
 });
 
 app.get("/word/:wordId", cacheWords, (req, res) => {
+  const uri = process.env.MONGODB_URL;
+  const client = new MongoClient(uri);
+
+  async function run() {
+    try {
+      await client.connect();
+      const db = client.db("mern-oxford-dictionaries");
+      const coll = db.collection("accesslog");
+      
+      const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+      const userAgent = req.headers["user-agent"];
+      const deviceDetector = new DeviceDetector();
+      const device = deviceDetector.parse(userAgent);
+      const deviceDetails = {
+        url: "definitions/" + req.params.wordId,
+        ip,
+        userAgent,
+        device,
+        timestamp: Date().toString(),
+      };
+
+      const result = await coll.insertOne(deviceDetails);
+      //console.log(result.insertedIds);
+    } finally {
+      await client.close();
+    }
+  }
+  run().catch(console.dir);
+
   const options = {
     host: "od-api.oxforddictionaries.com",
     port: "443",
