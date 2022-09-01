@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { IconButton, Divider } from "@material-ui/core";
 import {
@@ -7,7 +7,6 @@ import {
   Star as StarIcon,
   Share as ShareIcon,
 } from "@material-ui/icons";
-import ReactHowler from "react-howler";
 
 import Page from "./components/Page";
 import BackdropComponent from "./components/BackdropComponent";
@@ -84,9 +83,20 @@ export default function Definition() {
       : 14
   );
   const [isBookmarked, setBookmarked] = useState(false);
-  const [isPronunciationPlaying, setPronunciationPlaying] = useState(false);
+  const [audioFileUrl, setAudioFileUrl] = useState(
+    "http://goldfirestudios.com/proj/howlerjs/sound.ogg"
+  );
+  const [isPlaying, setPlaying] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+
   const wordId = searchParams.get("q");
+  const htmlAudioRef = useRef(null);
+
+  useEffect(() => {
+    const pronunciation = new Audio(audioFileUrl);
+    isPlaying ? pronunciation.play() : pronunciation.pause();
+    pronunciation.onended = () => setPlaying(false);
+  }, [isPlaying]);
 
   useEffect(() => {
     setState("loading");
@@ -95,7 +105,8 @@ export default function Definition() {
       .then((jsonData) => {
         setData(jsonData);
         setState("loaded");
-        !jsonData.error && addWordToHistory({ wordId: jsonData.id, word: jsonData.word });
+        !jsonData.error &&
+          addWordToHistory({ wordId: jsonData.id, word: jsonData.word });
         checkIfBookmarked(wordId);
       })
       .catch(() => {
@@ -199,7 +210,7 @@ export default function Definition() {
         return (
           <>
             <div style={{ display: "flex", gap: 5 }}>
-              <span style={styles.word}>{data.word}</span>
+              <span style={styles.word}>{data?.word}</span>
               <div style={{ flexGrow: 1 }}></div>
               <IconButton
                 size="small"
@@ -219,7 +230,10 @@ export default function Definition() {
                 size="small"
                 aria-label="toggle bookmark"
                 onClick={() =>
-                  toggleAddWordToBookmarks({ wordId: data.id, word: data.word })
+                  toggleAddWordToBookmarks({
+                    wordId: data?.id,
+                    word: data?.word,
+                  })
                 }
               >
                 {isBookmarked ? <StarIcon /> : <StarOutlineIcon />}
@@ -227,7 +241,7 @@ export default function Definition() {
               <IconButton
                 size="small"
                 aria-label="share word"
-                onClick={() => shareWord(data.word)}
+                onClick={() => shareWord(data?.word)}
               >
                 <ShareIcon />
               </IconButton>
@@ -242,58 +256,45 @@ export default function Definition() {
             ) : (
               <>
                 {data?.results?.map((a, ai) => (
-                  <>
-                    {a.lexicalEntries?.map((x, xi) => (
+                  <div key={ai}>
+                    {data?.results[0]?.lexicalEntries[0]?.entries[0]
+                      ?.pronunciations && (
                       <>
+                        <h4 style={styles.sectionTitle}>Pronunciation</h4>
+                        {data?.results[0]?.lexicalEntries[0]?.entries[0]?.pronunciations?.map(
+                          (c, ci) => (
+                            <div style={styles.pronunciationWrapper} key={ci}>
+                              <IconButton
+                                size="small"
+                                aria-label="play pronunciation"
+                                onClick={() => {
+                                  setAudioFileUrl(c.audioFile);
+                                  setPlaying(true);
+                                }}
+                              >
+                                <VolumeUpIcon />
+                              </IconButton>
+                              <p style={styles.dialect}>({c.dialects[0]})</p>
+                              <p style={styles.phoneticNotation}>
+                                {c.phoneticNotation}:
+                              </p>
+                              <p style={styles.phoneticSpelling}>
+                                /{c.phoneticSpelling}/
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </>
+                    )}
+
+                    {a.lexicalEntries?.map((x, xi) => (
+                      <div key={xi}>
                         <span style={styles.lexicalCategory}>
                           {x.lexicalCategory?.text}
                         </span>
 
                         {x.entries?.map((y, yi) => (
-                          <>
-                            {ai === 0 && xi === 0 && y.pronunciations && (
-                              <>
-                                <h4 style={styles.sectionTitle}>
-                                  Pronunciation
-                                </h4>
-                                {y.pronunciations?.map((c, ci) => (
-                                  <div key={ci}>
-                                    <div style={styles.pronunciationWrapper}>
-                                      <div
-                                        aria-label="play pronunciation"
-                                        onClick={() =>
-                                          setPronunciationPlaying(true)
-                                        }
-                                      >
-                                        <VolumeUpIcon />
-                                      </div>
-
-                                      <ReactHowler
-                                        src={c.audioFile}
-                                        playing={isPronunciationPlaying}
-                                        onStop={() =>
-                                          setPronunciationPlaying(false)
-                                        }
-                                        onEnd={() =>
-                                          setPronunciationPlaying(false)
-                                        }
-                                      />
-
-                                      <p style={styles.dialect}>
-                                        ({c.dialects[0]})
-                                      </p>
-                                      <p style={styles.phoneticNotation}>
-                                        {c.phoneticNotation}:
-                                      </p>
-                                      <p style={styles.phoneticSpelling}>
-                                        /{c.phoneticSpelling}/
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            )}
-
+                          <div key={yi}>
                             {y.etymologies && (
                               <>
                                 <h4 style={styles.sectionTitle}>Etymology</h4>
@@ -398,7 +399,7 @@ export default function Definition() {
                                           </h4>
                                           <div style={styles.synonyms}>
                                             {d.synonyms?.map((z, zi) => (
-                                              <>
+                                              <span key={zi}>
                                                 {z.language === "en" && (
                                                   <span
                                                     style={styles.synonym}
@@ -407,7 +408,7 @@ export default function Definition() {
                                                     {(zi ? ", " : "") + z.text}
                                                   </span>
                                                 )}
-                                              </>
+                                              </span>
                                             ))}
                                           </div>
                                         </div>
@@ -561,7 +562,7 @@ export default function Definition() {
                                                       >
                                                         {n.synonyms?.map(
                                                           (p, pi) => (
-                                                            <>
+                                                            <div key={pi}>
                                                               {p.language ===
                                                                 "en" && (
                                                                 <span
@@ -576,7 +577,7 @@ export default function Definition() {
                                                                     p.text}
                                                                 </span>
                                                               )}
-                                                            </>
+                                                            </div>
                                                           )
                                                         )}
                                                       </div>
@@ -619,13 +620,13 @@ export default function Definition() {
                                 </ol>
                               </>
                             )}
-                          </>
+                          </div>
                         ))}
 
-                        {ai < data.results.length && <Divider />}
-                      </>
+                        {ai < data?.results?.length && <Divider />}
+                      </div>
                     ))}
-                  </>
+                  </div>
                 ))}
 
                 {data?.results[0]?.lexicalEntries[0].derivatives && (
@@ -657,6 +658,7 @@ export default function Definition() {
                     </ul>
                   </>
                 )}
+
                 {data?.results[0]?.lexicalEntries[0]?.entries[0]?.notes && (
                   <>
                     <h4 style={styles.sectionTitle}>Note</h4>
