@@ -11,7 +11,15 @@ import {
 import Page from "./components/Page";
 import BackdropComponent from "./components/BackdropComponent";
 
+import Lottie from "react-lottie";
+import serverErrorAnimationData from "./lotties/92811-server-error.json";
+import wordNotFoundAnimationData from "./lotties/93949-pex-not-found.json";
+import noInternetAnimationData from "./lotties/90478-disconnect.json";
+
 const styles = {
+  centeredText: {
+    textAlign: "center",
+  },
   word: {
     fontSize: "1.5em",
     fontWeight: "bold",
@@ -194,17 +202,59 @@ export default function Definition() {
     }
   };
 
+  const serverErrorDefaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: serverErrorAnimationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+  const wordNotFoundDefaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: wordNotFoundAnimationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+  const noInternetDefaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: noInternetAnimationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+
   const DictionaryContent = () => {
     switch (state) {
       case "loading":
         return <BackdropComponent isLoading={true} />;
       case "error":
         return (
-          <p>
+          <>
             {navigator.onLine
-              ? "Error occurred while fetching data from server"
-              : "No internet connection"}
-          </p>
+              ? (<>
+                <Lottie
+                  options={serverErrorDefaultOptions}
+                  height={280}
+                  width={280}
+                />
+              <p style={styles.centeredText}>Error occurred while fetching data from server</p>
+                </>
+                ) : (
+                  <>
+                <Lottie
+                  options={noInternetDefaultOptions}
+                  height={280}
+                  width={280}
+                />
+                  <p style={styles.centeredText}>No internet connection</p>
+                  </>
+                  )
+              }
+          </>
         );
       case "loaded":
         return (
@@ -252,7 +302,14 @@ export default function Definition() {
               </p>
             )}
             {data?.error ? (
-              <p>Word not found. Please check the spelling.</p>
+              <>
+                <Lottie
+                  options={wordNotFoundDefaultOptions}
+                  height={280}
+                  width={280}
+                />
+                <p style={styles.centeredText}>Word not found. Please check the spelling.</p>
+              </>
             ) : (
               <>
                 {data?.results?.map((a, ai) => (
