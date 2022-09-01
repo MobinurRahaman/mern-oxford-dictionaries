@@ -187,6 +187,14 @@ function AsyncSearchSuggestions() {
     }
   };
 
+  const isTouchDevice = () => {
+    return (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      navigator.msMaxTouchPoints > 0
+    );
+  };
+
   const EndAdornment = () => {
     switch (status) {
       case "loading":
@@ -245,7 +253,7 @@ function AsyncSearchSuggestions() {
         <TextField
           {...params}
           type="search"
-          autoFocus
+          autoFocus={isTouchDevice ? false : true}
           placeholder="Enter search term here"
           variant="standard"
           onKeyUp={handleChange}
