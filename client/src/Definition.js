@@ -95,7 +95,7 @@ export default function Definition() {
       .then((jsonData) => {
         setData(jsonData);
         setState("loaded");
-        addWordToHistory({ wordId: jsonData.id, word: jsonData.word });
+        !jsonData.error && addWordToHistory({ wordId: jsonData.id, word: jsonData.word });
         checkIfBookmarked(wordId);
       })
       .catch(() => {

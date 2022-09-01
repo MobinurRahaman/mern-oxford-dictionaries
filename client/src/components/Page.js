@@ -231,7 +231,9 @@ function AsyncSearchSuggestions() {
       getOptionLabel={(option) => option.word}
       onChange={(event, newValue) => {
         if (newValue) {
-          navigate(`/definition/?q=${newValue.word ? newValue.word : newValue}`);
+          navigate(
+            `/definition/?q=${newValue.word ? newValue.word : newValue}`
+          );
         }
       }}
       onBlur={() => setStatus("idle")}
