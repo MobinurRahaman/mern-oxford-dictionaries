@@ -8,7 +8,11 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const DeviceDetector = require("device-detector-js");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+  })
+);
 let cache = apicache.middleware;
 
 app.use(bodyParser.urlencoded({ extended: true })); // body-parser
@@ -62,7 +66,7 @@ app.get("/word/:wordId", cacheWords, (req, res) => {
       await client.connect();
       const db = client.db("mern-oxford-dictionaries");
       const coll = db.collection("accesslog");
-      
+
       const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
       const userAgent = req.headers["user-agent"];
       const deviceDetector = new DeviceDetector();
