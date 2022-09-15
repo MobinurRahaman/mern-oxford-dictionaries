@@ -140,7 +140,7 @@ function AsyncSearchSuggestions() {
   const classes = useStyles();
   const navigate = useNavigate();
 
-  const { searchTerm } = useContext(SearchTermContext);
+  //const { searchTerm } = useContext(SearchTermContext);
 
   const [open, setOpen] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState("");
@@ -207,7 +207,7 @@ function AsyncSearchSuggestions() {
         );
       case "error":
         return <ErrorOutlineIcon className={classes.endAdornment} />;
-      case "default":
+      default:
         return null;
     }
   };
@@ -313,6 +313,7 @@ function Page(props) {
     if (finalTranscript.trim()) {
       navigate(`/definition/?q=${encodeURIComponent(finalTranscript)}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalTranscript]);
 
   const { window } = props;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { IconButton, Divider } from "@material-ui/core";
 import {
@@ -91,19 +91,17 @@ export default function Definition() {
       : 14
   );
   const [isBookmarked, setBookmarked] = useState(false);
-  const [audioFileUrl, setAudioFileUrl] = useState(
-    "http://goldfirestudios.com/proj/howlerjs/sound.ogg"
-  );
+  const [audioFileUrl, setAudioFileUrl] = useState("");
   const [isPlaying, setPlaying] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams } = useSearchParams();
 
   const wordId = searchParams.get("q");
-  const htmlAudioRef = useRef(null);
 
   useEffect(() => {
     const pronunciation = new Audio(audioFileUrl);
     isPlaying ? pronunciation.play() : pronunciation.pause();
     pronunciation.onended = () => setPlaying(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
 
   useEffect(() => {
@@ -234,26 +232,27 @@ export default function Definition() {
       case "error":
         return (
           <>
-            {navigator.onLine
-              ? (<>
+            {navigator.onLine ? (
+              <>
                 <Lottie
                   options={serverErrorDefaultOptions}
                   height={280}
                   width={280}
                 />
-              <p style={styles.centeredText}>Error occurred while fetching data from server</p>
-                </>
-                ) : (
-                  <>
+                <p style={styles.centeredText}>
+                  Error occurred while fetching data from server
+                </p>
+              </>
+            ) : (
+              <>
                 <Lottie
                   options={noInternetDefaultOptions}
                   height={280}
                   width={280}
                 />
-                  <p style={styles.centeredText}>No internet connection</p>
-                  </>
-                  )
-              }
+                <p style={styles.centeredText}>No internet connection</p>
+              </>
+            )}
           </>
         );
       case "loaded":
@@ -308,7 +307,9 @@ export default function Definition() {
                   height={280}
                   width={280}
                 />
-                <p style={styles.centeredText}>Word not found. Please check the spelling.</p>
+                <p style={styles.centeredText}>
+                  Word not found. Please check the spelling.
+                </p>
               </>
             ) : (
               <>
@@ -731,7 +732,7 @@ export default function Definition() {
             )}
           </>
         );
-      case "default":
+      default:
         return <p>Unknown error occurred</p>;
     }
   };
