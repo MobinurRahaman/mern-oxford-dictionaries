@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { IconButton, Divider } from "@material-ui/core";
 import {
   VolumeUp as VolumeUpIcon,
@@ -93,7 +93,8 @@ export default function Definition() {
   const [isBookmarked, setBookmarked] = useState(false);
   const [audioFileUrl, setAudioFileUrl] = useState("");
   const [isPlaying, setPlaying] = useState(false);
-  const { searchParams } = useSearchParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
 
   const wordId = searchParams.get("q");
 
