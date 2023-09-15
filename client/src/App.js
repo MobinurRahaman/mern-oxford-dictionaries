@@ -1,7 +1,8 @@
 import { useState, createContext } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Route, Routes } from "react-router";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { CssBaseline } from "@material-ui/core";
 
 import Home from "./Home";
 import Definition from "./Definition";
@@ -28,7 +29,7 @@ export default function App() {
       : localStorage.removeItem("darkMode");
   };
 
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       type: darkMode ? "dark" : "light",
     },
@@ -37,6 +38,7 @@ export default function App() {
   return (
     <DarkModeContext.Provider value={{ darkMode, setDarkModePersistantly }}>
       <ThemeProvider theme={theme}>
+        <CssBaseline enableColorScheme />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
