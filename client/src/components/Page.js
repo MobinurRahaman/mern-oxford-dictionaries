@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,289 +8,44 @@ import {
   Drawer,
   SwipeableDrawer,
   Hidden,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemSecondaryAction,
-  Divider,
-  Switch,
   IconButton,
   Typography,
-  TextField,
-  CircularProgress,
-  Modal,
+  Tooltip,
 } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import {
   ArrowBack as ArrowBackIcon,
   Menu as MenuIcon,
   Mic as MicIcon,
-  Home as HomeIcon,
-  History as HistoryIcon,
-  Star as StarIcon,
-  Receipt as ReceiptIcon,
-  Brightness3 as Brightness3Icon,
-  Clear as ClearIcon,
-  ErrorOutline as ErrorOutlineIcon,
 } from "@material-ui/icons";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { DarkModeContext } from "../App";
 
-import Lottie from "react-lottie";
-import animationData from "../lotties/19246-voice.json";
+import DrawerContent from "./DrawerContent";
+import AsyncSearchSuggestions from "./AsyncSearchSuggestions";
+import SpeechRecognitionModal from "./SpeechRecognitionModal";
+import usePageStyles from "../styles/pageStyles";
+import { SearchTermContext } from "../contexts/SearchTermContext";
+import { useAlertDialog } from "../hooks/useAlertDialog";
 
-const drawerWidth = 240;
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    "& .MuiAutocomplete-clearIndicator": {
-      color: "#fff",
-    },
-  },
-  drawer: {
-    [theme.breakpoints.up("md")]: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-  },
-  main: {
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: `calc(100% - ${drawerWidth}px)`,
-    },
-  },
-  accordion: {
-    border: "none",
-    boxShadow: "none",
-  },
-  list: {
-    flex: 1,
-  },
-  listIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-  },
-  appBar: {
-    [theme.breakpoints.up("md")]: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
-    },
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-    [theme.breakpoints.up("md")]: {
-      display: "none",
-    },
-  },
-  // necessary for content to be below app bar
-  toolbar: theme.mixins.toolbar,
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  header: {
-    flex: 1,
-  },
-  centeredTitle: {
-    textAlign: "center",
-  },
-  autocomplete: {
-    [theme.breakpoints.up("md")]: {
-      maxWidth: 300,
-    },
-  },
-  input: {
-    color: "#fff",
-  },
-  endAdornment: {
-    marginRight: 35,
-  },
-  speechRecognitionModal: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  speechRecognitionModalBody: {
-    width: "90%",
-    maxWidth: 500,
-    padding: theme.spacing(4),
-    backgroundColor: theme.palette.background.paper,
-  },
-  transcript: {
-    textAlign: "center",
-  },
-  content: {
-    position: "relative",
-    width: "100%",
-    //height: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
-    //overflow: "auto",
-    boxSizing: "border-box",
-  },
-}));
-
-const SearchTermContext = createContext();
-
-function AsyncSearchSuggestions() {
-  const classes = useStyles();
-  const navigate = useNavigate();
-
-  //const { searchTerm } = useContext(SearchTermContext);
-
-  const [open, setOpen] = useState(false);
-  const [searchInputValue, setSearchInputValue] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [options, setOptions] = useState([]);
-
-  const handleChange = (event) => {
-    setSearchInputValue(event.target.value);
-
-    if (event.target.value) {
-      if (event.keyCode === 13) {
-        navigate(`/definition/?q=${encodeURIComponent(event.target.value)}`);
-      } else {
-        setStatus("loading");
-        fetch(
-          `${process.env.REACT_APP_SERVER_BASE_URL}/search/${encodeURIComponent(
-            event.target.value
-          )}`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.results) {
-              setOptions(data.results);
-              setStatus("idle");
-            } else if (data.limit_error) {
-              setStatus("error");
-              setTimeout(() => setStatus("idle"), 1000);
-              setOpen(false);
-              alert(
-                "Usage limit exceeded. Contact the admin to get further access."
-              );
-            } else {
-              setStatus("error");
-              setTimeout(() => setStatus("idle"), 1000);
-            }
-          })
-          .catch((err) => {
-            setStatus("error");
-            setTimeout(() => setStatus("idle"), 1000);
-          });
-      }
-    } else {
-      setOptions([]);
-    }
-  };
-
-  const isTouchDevice = () => {
-    return (
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      navigator.msMaxTouchPoints > 0
-    );
-  };
-
-  const EndAdornment = () => {
-    switch (status) {
-      case "loading":
-        return (
-          <CircularProgress
-            className={classes.endAdornment}
-            color="inherit"
-            size={20}
-          />
-        );
-      case "error":
-        return <ErrorOutlineIcon className={classes.endAdornment} />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Autocomplete
-      id="search-field"
-      className={classes.autocomplete}
-      fullWidth
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      closeIcon={
-        searchInputValue ? (
-          <ClearIcon
-            onClick={() => {
-              setSearchInputValue("");
-              setOpen(false);
-              setOptions([]);
-            }}
-          />
-        ) : null
-      }
-      isOptionEqualToValue={(option, value) => option.word === value.word}
-      getOptionLabel={(option) => option.word}
-      onChange={(event, newValue) => {
-        if (newValue) {
-          navigate(
-            `/definition/?q=${newValue.word ? newValue.word : newValue}`
-          );
-        }
-      }}
-      onBlur={() => setStatus("idle")}
-      noOptionsText={searchInputValue ? "No results found" : ""}
-      options={options}
-      loading={status !== "idle" ? true : false}
-      freeSolo
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          type="search"
-          autoFocus={isTouchDevice ? false : true}
-          placeholder="Enter search term here"
-          variant="standard"
-          onKeyUp={handleChange}
-          InputProps={{
-            ...params.InputProps,
-            className: classes.input,
-            disableUnderline: true,
-            endAdornment: (
-              <>
-                <EndAdornment />
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
-    />
-  );
-}
-
-function Page(props) {
-  const classes = useStyles();
+function Page({
+  window,
+  title,
+  centeredTitle,
+  backBtn,
+  noRightBtns,
+  noDrawer,
+  searchField,
+  noPadding,
+  children,
+}) {
+  const classes = usePageStyles();
   const navigate = useNavigate();
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-
-  const { darkMode, setDarkModePersistantly } = useContext(DarkModeContext);
-
-  const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: animationData,
-    rendererSettings: {
-      preserveAspectRatio: "xMidYMid slice",
-    },
-  };
+  const [showAlert, AlertDialogComponent] = useAlertDialog();
 
   const { transcript, finalTranscript, listening, isMicrophoneAvailable } =
     useSpeechRecognition();
@@ -299,10 +54,30 @@ function Page(props) {
     if (isMicrophoneAvailable) {
       SpeechRecognition.startListening();
     } else {
-      alert(
-        "Microphone permission is not available\nGo to Settings -> Site settings -> Microphone and allow microphone access for this site"
+      showAlert(
+        "Microphone permission is not available",
+        "To enable microphone permission:\n\n" +
+          "Chrome:\n" +
+          "1. Click the lock icon next to the URL.\n" +
+          "2. Find 'Microphone' in the dropdown menu.\n" +
+          "3. Select 'Allow'.\n" +
+          "4. Refresh the page.\n\n" +
+          "Firefox:\n" +
+          "1. Click the shield icon next to the URL.\n" +
+          "2. Go to 'Permissions'.\n" +
+          "3. Find 'Microphone' and select 'Allow'.\n" +
+          "4. Refresh the page.\n\n" +
+          "Safari:\n" +
+          "1. Click Safari in the top menu.\n" +
+          "2. Select 'Settings for This Website'.\n" +
+          "3. Find 'Microphone' and choose 'Allow'.\n" +
+          "4. Refresh the page."
       );
     }
+  };
+
+  const stopListening = () => {
+    SpeechRecognition.abortListening();
   };
 
   useEffect(() => {
@@ -313,67 +88,11 @@ function Page(props) {
     if (finalTranscript.trim()) {
       navigate(`/definition/?q=${encodeURIComponent(finalTranscript)}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finalTranscript]);
+  }, [finalTranscript, navigate]);
 
-  const { window } = props;
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-
-  const drawer = (
-    <div>
-      <List aria-label="menu">
-        <ListItem button onClick={() => navigate("/")}>
-          <ListItemIcon>
-            <HomeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem button onClick={() => navigate("/history")}>
-          <ListItemIcon>
-            <HistoryIcon />
-          </ListItemIcon>
-          <ListItemText primary="History" />
-        </ListItem>
-        <ListItem button onClick={() => navigate("/bookmarks")}>
-          <ListItemIcon>
-            <StarIcon />
-          </ListItemIcon>
-          <ListItemText primary="Bookmarks" />
-        </ListItem>
-      </List>
-      <Divider />
-      <List aria-label="misc">
-        <ListItem button onClick={() => navigate("/privacy-policy")}>
-          <ListItemIcon>
-            <ReceiptIcon />
-          </ListItemIcon>
-          <ListItemText primary="Privacy policy" />
-        </ListItem>
-      </List>
-      <Divider />
-      <List aria-label="settings">
-        <ListItem>
-          <ListItemIcon>
-            <Brightness3Icon />
-          </ListItemIcon>
-          <ListItemText primary="Dark mode" />
-          <ListItemSecondaryAction>
-            <Switch
-              color="primary"
-              checked={darkMode}
-              onChange={() => {
-                setDarkModePersistantly(!darkMode);
-              }}
-              name="darkMode"
-              inputProps={{ "aria-label": "toggle dark mode" }}
-            />
-          </ListItemSecondaryAction>
-        </ListItem>
-      </List>
-    </div>
-  );
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -383,7 +102,7 @@ function Page(props) {
       <CssBaseline />
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          {props.backBtn && (
+          {backBtn && (
             <IconButton
               edge="start"
               color="inherit"
@@ -394,69 +113,62 @@ function Page(props) {
             </IconButton>
           )}
 
-          {!props.noDrawer && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              className={classes.menuButton}
-              onClick={handleDrawerToggle}
-            >
-              <MenuIcon />
-            </IconButton>
+          {!noDrawer && (
+            <Tooltip title="Menu">
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                className={classes.menuButton}
+                onClick={handleDrawerToggle}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Tooltip>
           )}
 
           <Typography
             noWrap
             variant="h6"
             className={`${classes.header} ${
-              props.centeredTitle && classes.centeredTitle
+              centeredTitle && classes.centeredTitle
             }`}
           >
-            {props.title}
+            {title}
           </Typography>
-          {props.searchField && (
+          {searchField && (
             <>
               <SearchTermContext.Provider value={{ searchTerm: "" }}>
                 <AsyncSearchSuggestions />
               </SearchTermContext.Provider>
-              <div className={classes.rightBtns}>
-                {!props.noRightBtns && (
+              <div>
+                {!noRightBtns && (
                   <>
-                    <IconButton
-                      edge="end"
-                      color="inherit"
-                      aria-label="voice search"
-                      onClick={startListening}
-                    >
-                      <MicIcon />
-                    </IconButton>
+                    <Tooltip title="Voice search">
+                      <IconButton
+                        edge="end"
+                        color="inherit"
+                        aria-label="voice search"
+                        onClick={startListening}
+                      >
+                        <MicIcon />
+                      </IconButton>
+                    </Tooltip>
                   </>
                 )}
               </div>
-              <Modal
-                className={classes.speechRecognitionModal}
+              <SpeechRecognitionModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onBackdropClick={() => SpeechRecognition.abortListening()}
-                aria-labelledby="speech-recognition-modal"
-                aria-describedby="speech-recognition-modal"
-              >
-                <div className={classes.speechRecognitionModalBody}>
-                  <Typography variant="h6">Listening...</Typography>
-                  <Lottie options={defaultOptions} height={120} width={200} />
-                  <Typography variant="body1" className={classes.transcript}>
-                    {transcript}
-                  </Typography>
-                </div>
-              </Modal>
+                onBackdropClick={stopListening}
+                transcript={transcript}
+              />
             </>
           )}
         </Toolbar>
       </AppBar>
-      {!props.noDrawer && (
+      {!noDrawer && (
         <nav className={classes.drawer} aria-label="category browser">
-          {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
           <Hidden mdUp implementation="css">
             <SwipeableDrawer
               container={container}
@@ -472,7 +184,7 @@ function Page(props) {
                 keepMounted: true, // Better open performance on mobile.
               }}
             >
-              {drawer}
+              <DrawerContent />
             </SwipeableDrawer>
           </Hidden>
           <Hidden smDown implementation="css">
@@ -483,7 +195,7 @@ function Page(props) {
               variant="permanent"
               open
             >
-              {drawer}
+              <DrawerContent />
             </Drawer>
           </Hidden>
         </nav>
@@ -492,21 +204,26 @@ function Page(props) {
         <div className={classes.toolbar} />
         <div
           className={classes.content}
-          style={{ padding: props.noPadding ? 0 : theme.spacing(1) }}
+          style={{ padding: noPadding ? 0 : theme.spacing(1) }}
         >
-          {props.children}
+          {children}
         </div>
       </main>
+      <AlertDialogComponent />
     </div>
   );
 }
 
 Page.propTypes = {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
   window: PropTypes.func,
+  title: PropTypes.string,
+  centeredTitle: PropTypes.bool,
+  backBtn: PropTypes.bool,
+  noRightBtns: PropTypes.bool,
+  noDrawer: PropTypes.bool,
+  searchField: PropTypes.bool,
+  noPadding: PropTypes.bool,
+  children: PropTypes.node,
 };
 
 export default Page;

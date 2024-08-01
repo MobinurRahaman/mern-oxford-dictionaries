@@ -1,6 +1,5 @@
-import { useState, createContext } from "react";
-import { BrowserRouter } from "react-router-dom";
-import { Route, Routes } from "react-router";
+import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { CssBaseline } from "@material-ui/core";
 
@@ -9,8 +8,7 @@ import Definition from "./Definition";
 import History from "./History";
 import Bookmarks from "./Bookmarks";
 import PageNotFound from "./PageNotFound";
-
-export const DarkModeContext = createContext();
+import { DarkModeContext } from "./contexts/DarkModeContext";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(
